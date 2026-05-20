@@ -4,6 +4,8 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { consumePasswordResetToken } from '@/lib/token';
 import { logger } from '@/lib/logger';
+import { enforceRateLimit } from '@/lib/rateLimiter';
+import { validateOrigin } from '@/lib/csrf';
 
 const resetPasswordSchema = z.object({
   token: z.string().min(1),
@@ -14,6 +16,23 @@ type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 
 export async function POST(request: Request) {
   try {
+    const csrf = validateOrigin(request);
+    if (csrf.error) return csrf.error;
+
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+    try {
+      await enforceRateLimit(ip, 'reset-password');
+    } catch (e) {
+      const err = e as { status?: number };
+      if (err.status === 429) {
+        return NextResponse.json(
+          { error: 'Too many attempts. Please try again later.' },
+          { status: 429 }
+        );
+      }
+      throw e;
+    }
+
     const body = (await request.json()) as ResetPasswordInput;
     const parsed = resetPasswordSchema.safeParse(body);
     if (!parsed.success) {

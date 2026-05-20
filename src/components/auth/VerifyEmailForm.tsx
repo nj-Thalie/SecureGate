@@ -4,6 +4,7 @@ import { useState, FormEvent, useEffect, useRef } from 'react';
 import Spinner from '@/components/ui/Spinner';
 import FormError from '@/components/ui/FormError';
 import FormSuccess from '@/components/ui/FormSuccess';
+import Input from '@/components/ui/Input';
 import type { AuthMode } from './types';
 
 export default function VerifyEmailForm({ token, switchMode }: { token: string; switchMode: (m: AuthMode) => void }) {
@@ -79,8 +80,8 @@ export default function VerifyEmailForm({ token, switchMode }: { token: string; 
           <FormError message={message} />
           <p className="mt-6 text-sm font-medium text-zinc-700">Resend verification email</p>
           <form onSubmit={handleResend} className="mt-2 space-y-3">
-            <input type="email" required placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)}
-              className="block w-full rounded border border-zinc-300 px-3 py-2 text-sm text-zinc-900 bg-white shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+            <label htmlFor="resend-email" className="sr-only">Email address</label>
+            <Input id="resend-email" type="email" required placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} />
             {resendMsg && <FormSuccess message={resendMsg} />}
             <button type="submit" disabled={resending}
               className="w-full rounded bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50">

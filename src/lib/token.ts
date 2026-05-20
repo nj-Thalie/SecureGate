@@ -30,23 +30,22 @@ export const createVerificationToken = async (email: string): Promise<string> =>
 /**
  * Consume a verification token.
  * Returns the associated email if the token is valid and not expired.
- * Deletes the token in all cases where it was found (expired or not).
+ * Deletes atomically so concurrent requests can't both succeed.
  */
 export const consumeVerificationToken = async (
   token: string
 ): Promise<string | null> => {
-  const record = await prisma.verificationToken.findUnique({
-    where: { token },
-  });
+  try {
+    const record = await prisma.verificationToken.delete({
+      where: { token },
+    });
 
-  if (!record) return null;
+    if (record.expires < new Date()) return null;
 
-  // Always delete the token — single use
-  await prisma.verificationToken.delete({ where: { token } });
-
-  if (record.expires < new Date()) return null; // expired
-
-  return record.identifier; // the email address
+    return record.identifier;
+  } catch {
+    return null;
+  }
 };
 
 // ─── Password-reset token (1 hour) ───────────────────────────────────────────
@@ -77,15 +76,15 @@ export const createPasswordResetToken = async (
 export const consumePasswordResetToken = async (
   token: string
 ): Promise<string | null> => {
-  const record = await prisma.passwordResetToken.findUnique({
-    where: { token },
-  });
+  try {
+    const record = await prisma.passwordResetToken.delete({
+      where: { token },
+    });
 
-  if (!record) return null;
+    if (record.expires < new Date()) return null;
 
-  await prisma.passwordResetToken.delete({ where: { token } });
-
-  if (record.expires < new Date()) return null;
-
-  return record.email;
+    return record.email;
+  } catch {
+    return null;
+  }
 };

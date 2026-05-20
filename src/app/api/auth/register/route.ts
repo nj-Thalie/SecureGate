@@ -6,6 +6,7 @@ import { sendVerificationEmail } from '@/lib/mail';
 import bcrypt from 'bcryptjs';
 import { logger } from '@/lib/logger';
 import { enforceRateLimit } from '@/lib/rateLimiter';
+import { validateOrigin } from '@/lib/csrf';
 
 const registerSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -17,6 +18,9 @@ type RegisterInput = z.infer<typeof registerSchema>;
 
 export async function POST(request: Request) {
   try {
+    const csrf = validateOrigin(request);
+    if (csrf.error) return csrf.error;
+
     const ip = request.headers.get('x-forwarded-for') || 'unknown';
     try {
       await enforceRateLimit(ip, 'register');
@@ -36,12 +40,13 @@ export async function POST(request: Request) {
     if (!parsed.success) {
       return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
     }
-    const { email, password, name } = parsed.data;
+    const name = parsed.data.name.trim();
+    const { email, password } = parsed.data;
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
       if (existing.emailVerified) {
-        return NextResponse.json({ error: 'An account with this email already exists' }, { status: 409 });
+        return NextResponse.json({ message: 'Check your email to verify your account' }, { status: 200 });
       }
       const hashed = await bcrypt.hash(password, 12);
       await prisma.user.update({

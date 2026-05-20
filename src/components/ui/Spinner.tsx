@@ -1,8 +1,6 @@
-import React from 'react';
-
 export default function Spinner() {
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex items-center justify-center" role="status" aria-label="Loading">
       <svg
         className="animate-spin h-6 w-6 text-indigo-600"
         xmlns="http://www.w3.org/2000/svg"

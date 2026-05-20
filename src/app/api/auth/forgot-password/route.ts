@@ -5,6 +5,7 @@ import { createPasswordResetToken } from '@/lib/token';
 import { sendPasswordResetEmail } from '@/lib/mail';
 import { logger } from '@/lib/logger';
 import { enforceRateLimit } from '@/lib/rateLimiter';
+import { validateOrigin } from '@/lib/csrf';
 
 const forgotSchema = z.object({
   email: z.string().email('Invalid email'),
@@ -14,6 +15,9 @@ type ForgotInput = z.infer<typeof forgotSchema>;
 
 export async function POST(request: Request) {
   try {
+    const csrf = validateOrigin(request);
+    if (csrf.error) return csrf.error;
+
     const ip = request.headers.get('x-forwarded-for') || 'unknown';
     try {
       await enforceRateLimit(ip, 'forgot-password');

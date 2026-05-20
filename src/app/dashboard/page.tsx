@@ -4,6 +4,8 @@ import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
+import ErrorBoundary from '@/components/ui/ErrorBoundary';
+
 export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -27,6 +29,7 @@ export default function DashboardPage() {
   }
 
   return (
+    <ErrorBoundary>
     <div className="flex min-h-screen flex-col bg-zinc-50">
       <header className="border-b border-zinc-200 bg-white">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
@@ -57,5 +60,6 @@ export default function DashboardPage() {
         </div>
       </main>
     </div>
+    </ErrorBoundary>
   );
 }

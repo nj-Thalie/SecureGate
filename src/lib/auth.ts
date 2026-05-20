@@ -1,11 +1,14 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
-import { compareSync } from "bcryptjs";
+import { compareSync, hashSync } from "bcryptjs";
+
+const DUMMY_HASH = hashSync("dummy", 12);
 
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
+    maxAge: 24 * 60 * 60,
   },
   pages: {
     signIn: "/auth",
@@ -28,20 +31,17 @@ export const authOptions: NextAuthOptions = {
           where: { email: credentials.email },
         });
 
-        // No user — return null with same timing as bad-password to resist enumeration
-        if (!user) {
-          return null;
-        }
+        const passwordMatch = user
+          ? compareSync(credentials.password, user.password)
+          : compareSync(credentials.password, DUMMY_HASH);
 
-        // Verify password — bcryptjs compareSync (12-round $2b$ hash)
-        const passwordMatch = compareSync(credentials.password, user.password);
+        if (!user) return null;
+
         if (!passwordMatch) {
           return null;
         }
 
-        // Block unverified users — they must verify email before logging in
         if (!user.emailVerified) {
-          // Throw an error that the sign-in page can detect
           throw new Error("EMAIL_NOT_VERIFIED");
         }
 

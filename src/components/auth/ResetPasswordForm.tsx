@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Spinner from '@/components/ui/Spinner';
 import FormError from '@/components/ui/FormError';
 import FormSuccess from '@/components/ui/FormSuccess';
+import Input from '@/components/ui/Input';
 import PasswordStrengthIndicator from '@/components/ui/PasswordStrengthIndicator';
 export default function ResetPasswordForm({ token }: { token: string }) {
   const router = useRouter();
@@ -12,6 +13,13 @@ export default function ResetPasswordForm({ token }: { token: string }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const redirectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (redirectTimer.current) clearTimeout(redirectTimer.current);
+    };
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -34,7 +42,7 @@ export default function ResetPasswordForm({ token }: { token: string }) {
         return;
       }
       setSuccess('Password reset successful! Redirecting...');
-      setTimeout(() => router.push('/auth?mode=login'), 2000);
+      redirectTimer.current = setTimeout(() => router.push('/auth?mode=login'), 2000);
     } catch {
       setError('An unexpected error occurred');
     } finally {
@@ -48,8 +56,7 @@ export default function ResetPasswordForm({ token }: { token: string }) {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="new-password" className="block text-sm font-medium text-zinc-700">New password</label>
-          <input id="new-password" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 block w-full rounded border border-zinc-300 px-3 py-2 text-sm text-zinc-900 bg-white shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+          <Input id="new-password" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} />
           {password && <PasswordStrengthIndicator password={password} />}
         </div>
         {error && <FormError message={error} />}

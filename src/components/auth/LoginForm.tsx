@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import Spinner from '@/components/ui/Spinner';
 import FormError from '@/components/ui/FormError';
+import Input from '@/components/ui/Input';
 import type { AuthMode } from './types';
 
 export default function LoginForm({ switchMode }: { switchMode: (m: AuthMode) => void }) {
@@ -42,13 +43,11 @@ export default function LoginForm({ switchMode }: { switchMode: (m: AuthMode) =>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-zinc-700">Email</label>
-          <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 block w-full rounded border border-zinc-300 px-3 py-2 text-sm text-zinc-900 bg-white shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+          <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-zinc-700">Password</label>
-          <input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 block w-full rounded border border-zinc-300 px-3 py-2 text-sm text-zinc-900 bg-white shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+          <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
         {error && <FormError message={error} />}
         <button type="submit" disabled={loading}

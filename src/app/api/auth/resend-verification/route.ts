@@ -5,6 +5,7 @@ import { createVerificationToken } from '@/lib/token';
 import { sendVerificationEmail } from '@/lib/mail';
 import { logger } from '@/lib/logger';
 import { enforceRateLimit } from '@/lib/rateLimiter';
+import { validateOrigin } from '@/lib/csrf';
 
 const resendSchema = z.object({
   email: z.string().email('Invalid email'),
@@ -12,6 +13,9 @@ const resendSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    const csrf = validateOrigin(request);
+    if (csrf.error) return csrf.error;
+
     const ip = request.headers.get('x-forwarded-for') || 'unknown';
     try {
       await enforceRateLimit(ip, 'resend-verification');

@@ -4,6 +4,7 @@ import { useState, FormEvent } from 'react';
 import Spinner from '@/components/ui/Spinner';
 import FormError from '@/components/ui/FormError';
 import FormSuccess from '@/components/ui/FormSuccess';
+import Input from '@/components/ui/Input';
 import PasswordStrengthIndicator from '@/components/ui/PasswordStrengthIndicator';
 import type { AuthMode } from './types';
 
@@ -45,18 +46,15 @@ export default function SignupForm({ switchMode }: { switchMode: (m: AuthMode) =
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-zinc-700">Full name</label>
-          <input id="name" type="text" required value={name} onChange={(e) => setName(e.target.value)}
-            className="mt-1 block w-full rounded border border-zinc-300 px-3 py-2 text-sm text-zinc-900 bg-white shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+          <Input id="name" type="text" required value={name} onChange={(e) => setName(e.target.value)} />
         </div>
         <div>
           <label htmlFor="signup-email" className="block text-sm font-medium text-zinc-700">Enter e-mail</label>
-          <input id="signup-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 block w-full rounded border border-zinc-300 px-3 py-2 text-sm text-zinc-900 bg-white shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+          <Input id="signup-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
         <div>
           <label htmlFor="signup-password" className="block text-sm font-medium text-zinc-700">Choose Password</label>
-          <input id="signup-password" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 block w-full rounded border border-zinc-300 px-3 py-2 text-sm text-zinc-900 bg-white shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+          <Input id="signup-password" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} />
           {password && <PasswordStrengthIndicator password={password} />}
         </div>
         {error && <FormError message={error} />}
